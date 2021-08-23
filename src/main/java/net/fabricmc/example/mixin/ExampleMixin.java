@@ -10,9 +10,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(AbstractBlock.class)
 public class ExampleMixin {
@@ -20,8 +17,17 @@ public class ExampleMixin {
 	public void calcBlockBreakingDelta(BlockState state, PlayerEntity player, BlockView world, BlockPos pos,
 			CallbackInfoReturnable<Float> ci) {
 
+		float f = state.getHardness(world, pos);
 		if (state.getBlock() == Blocks.DEEPSLATE) {
-				ci.setReturnValue(player.getBlockBreakingSpeed(state) / 1.5f / 30.0f);
-			}
+            int i = player.canHarvest(state) ? 30 : 100;
+            ci.setReturnValue(player.getBlockBreakingSpeed(state) / 1.5f / (float)i);
 		}
+        else if(f == -1.0F) {
+			ci.setReturnValue(0.0F);
+        } else {
+            int i = player.canHarvest(state) ? 30 : 100;
+            ci.setReturnValue(player.getBlockBreakingSpeed(state) / f / (float)i);
+        }
+
 	}
+}
